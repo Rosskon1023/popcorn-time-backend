@@ -6,6 +6,7 @@ const cors = require('cors');
 require('dotenv').config();
 
 // Add Controllers
+const trailersController = require('./controllers/trailers.js');
 
 
 // Initialize the Application
@@ -33,6 +34,7 @@ app.use(express.json());
 
 
 // Mount Routes
+app.use('/', trailersController);
 
 
 // Application Listener
