@@ -9,8 +9,8 @@ const TrailerSchema = new Schema({
     revenue: String,
     runtime: String,
     videoKey: String,
-    posterPath: String,
-    backdropPath: String
+    poster_path: String,
+    backdrop_path: String
 }, {timestamps: true});
 
 const Trailer = mongoose.model("Trailer", TrailerSchema);
