@@ -1,6 +1,29 @@
 // Require Dependencies
 const express = require('express');
 
+const admin = require('firebase-admin');
+
+const serviceAccount = require('../service-account-credentials.json');
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount)
+});
+
+// Authenticated Function
+async function isAuthenticated(req,res,next) {
+    try {
+        const token = req.get('Authorization');
+        if(!token) throw new Error('You must be logged in')
+        const user = await admin.auth().verifyIdToken(token.replace('Bearer ', ''));
+        if(!user) throw new Error('something went wrong');
+        req.user = user;
+        next();
+    } catch (error) {
+        res.status(400).json({message: error.message});
+    }
+}
+
+
 // Create a Route Object
 const trailersRouter = express.Router();
 const Trailer = require('../models/trailer.js');
@@ -11,9 +34,9 @@ trailersRouter.get("/", (req,res) => {
 });
 
 // Index 
-trailersRouter.get("/trailers", async (req,res) => {
+trailersRouter.get("/trailers", isAuthenticated, async (req,res) => {
     try{
-        res.json(await Trailer.find({}))
+        res.json(await Trailer.find({uId: req.user.uid}))
     } catch (error) {
         res.status(400).json(error)
     }
@@ -30,8 +53,9 @@ trailersRouter.delete("/mytrailers/:id", async (req,res) => {
 
 
 // Create 
-trailersRouter.post("/trailers", async (req,res) => {
+trailersRouter.post("/trailers", isAuthenticated, async (req,res) => {
     try {
+        req.body[0].uId = req.user.uid;
         req.body[0].title = req.body[0].movieIdData.title;
         req.body[0].overview = req.body[0].movieIdData.overview;
         req.body[0].tagline = req.body[0].movieIdData.tagline;
