@@ -44,7 +44,7 @@ trailersRouter.get("/trailers", isAuthenticated, async (req,res) => {
 });
 
 // Delete
-trailersRouter.delete("/mytrailers/:id", async (req,res) => {
+trailersRouter.delete("/mytrailers/:id", isAuthenticated, async (req,res) => {
     try {
         res.json(await Trailer.findByIdAndDelete(req.params.id))
     } catch (error) {
